@@ -106,7 +106,7 @@ resource "maas_vm_host" "tf_test_vm_host" {
 
 resource "maas_vm_host_machine" "tf_test_vm" {
     cores = 1
-    memory = 8192
+    memory = 2048
 }
 
 resource "maas_instance" "tf_test_host_instance" {
