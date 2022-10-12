@@ -63,7 +63,7 @@ class MAASTerraformEndToEnd:
                     assert value == result
         assert found
 
-    def check_maas_subnet(self, cfg: dict[str, Any])
+    def check_maas_subnet(self, cfg: dict[str, Any]):
         subnet = self._maas.subnets.get(cfg["cidr"])
         assert subnet is not None
         for key, value in cfg.items():
