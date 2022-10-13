@@ -3,7 +3,9 @@
 import logging
 import subprocess
 
+import pytest
 import hcl2
+
 from maas.client import connect
 from maas.client.enum import NodeStatus
 
