@@ -138,4 +138,4 @@ def test_maas_terraform_provider(log: logging.Logger):
 
 
 if __name__ == "__main__":
-    pytest.main()
+    pytest.main(args=["-v", "--junitxml=junit.xml"])
