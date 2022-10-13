@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import logging
+import os
 import subprocess
 from typing import Any
 
@@ -125,8 +126,9 @@ class MAASTerraformEndToEnd:
             log.info(f"stderr:\n{out}")
 
 
-def test_maas_terraform_provider(log: logging.Logger):
+def test_maas_terraform_provider():
     tester = MAASTerraformEndToEnd()
+    log = logging.getLogger()
     try:
         tester.setup(log)
         tester.check_results()
