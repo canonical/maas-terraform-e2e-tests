@@ -2,6 +2,7 @@
 
 import logging
 import subprocess
+from typing import Any
 
 import pytest
 import hcl2
@@ -124,7 +125,7 @@ class MAASTerraformEndToEnd:
             log.info(f"stderr:\n{out}")
 
 
-def test_maas_terraform_provider(log: logging.Loger):
+def test_maas_terraform_provider(log: logging.Logger):
     tester = MAASTerraformEndToEnd()
     try:
         tester.setup(log)
