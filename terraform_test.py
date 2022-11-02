@@ -3,7 +3,7 @@
 import logging
 import os
 import subprocess
-from typing import Any
+from typing import Any, List
 
 import pytest
 import hcl2
@@ -12,7 +12,7 @@ from maas.client import connect
 from maas.client.enum import NodeStatus
 
 
-DEFAULT_TERRAFORM_TIMEOUT=300 # allow up to 5 minutes for Terraform to spin things up
+DEFAULT_TERRAFORM_TIMEOUT=600 # allow up to 10 minutes for Terraform to spin things up
 DEFAULT_TERRAFORM_CONFIG = "./terraform_test.tf"
 
 
@@ -24,41 +24,61 @@ class MAASTerraformEndToEnd:
         # reusing Terraform variables to ensure same connection
         self._maas = connect(os.environ["TF_VAR_maas_url"], apikey=os.environ["TF_VAR_apikey"])
 
-    def setup(self, log: logging.Logger) -> None:
-        cmd = ["terraform","apply"]
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    def _log_proc_output(self, proc: subprocess.Popen, log: logging.Logger, is_err: bool = False):
+        logfn = log.info
+        if is_err:
+            logfn = log.error
+        
+        if proc.stdout:
+            stdout = proc.stdout.read().decode("utf-8")
+            logfn(f"stdout:\n{stdout}")
+        
+        logfn("----------------------------------------------------------------")
+        
+        if proc.stderr:
+            stderr = proc.stderr.read().decode("utf-8")
+            logfn(f"stderr:\n{stderr}")
 
+    def _run_and_check_tf(self, args: List[str], log: logging.Logger):
+        proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        stdout, stderr = None, None
         try:
-            out, err = proc.communicate(timeout=self._tf_timeout)
-        except TimeoutExpired:
+            ret_code = proc.wait(timeout=self._tf_timeout)
+            assert ret_code == 0
+        except subprocess.TimeoutExpired:
             proc.kill()
             log.error("Terraform execution timed out, stdout and stderr are as follows:")
-            log.error(f"stdout:\n{out}")
-            log.error("----------------------------------------------------------------")
-            log.error(f"stderr:\n{out}")
+            self._log_proc_output(proc, log, is_err=True)
+            raise
         except Exception as e:
             proc.kill()
             log.error(f"Terraform execution encountered an error, {e},\n stdout and stderr are as follows:")
-            log.error(f"stdout:\n{out}")
-            log.error("----------------------------------------------------------------")
-            log.error(f"stderr:\n{out}")
+            self._log_proc_output(proc, log, is_err=True)
+            raise
         else:
             log.info("Terraform succeeded, stdout and stderr are as follows:")
-            log.info(f"stdout:\n{out}")
-            log.info("----------------------------------------------------------------")
-            log.info(f"stderr:\n{out}")
+            self._log_proc_output(proc, log)
+
+    def setup(self, log: logging.Logger) -> None:
+        init = ["terraform", "init"]
+        self._run_and_check_tf(init, log)
+        cmd = ["terraform","apply", "-auto-approve", "-input=false"]
+        self._run_and_check_tf(cmd, log)
 
     def check_maas_fabric(self, cfg: dict[str, Any]):
         fabrics = self._maas.fabrics.list()
+        assert fabrics > 0
         assert cfg["name"] in [ fabric.name for fabric in fabrics ]
 
     def check_maas_space(self, cfg: dict[str, Any]):
         spaces = self._maas.spaces.list()
+        assert len(spaces) > 0
         assert cfg["name"] in [ space.name for space in spaces ]
 
     def check_maas_vlan(self, cfg: dict[str, Any]):
         vlans = self._maas.vlans.list()
         found = False
+        assert vlans > 0
         for vlan in vlans:
             if cfg["name"] == vlan.name:
                 found = True
@@ -95,35 +115,15 @@ class MAASTerraformEndToEnd:
     def check_results(self) -> None:
         with open(self._hcl_file) as f:
             tf_config = hcl2.load(f)
-        for resource in tf_config["resources"]:
+        for resource in tf_config["resource"]:
             for resource_type, cfg in resource.items():
                 if hasattr(self, f"check_{resource_type}"):
                     fn = getattr(self, f"check_{resource_type}")
-                    fn(cfg)
+                    fn(list(cfg.values())[0]) # cfg tends to be in the shape of {<name>: {"name": <name>}}
 
-    def teardown(self):
-        cmd = ["terraform", "destroy"]
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-
-        try:
-            out, err = proc.communicate(timeout=self._tf_timeout)
-        except TimeoutExpired:
-            proc.kill()
-            log.error("Teardown execution timed out, stdout and stderr are as follows:")
-            log.error(f"stdout:\n{out}")
-            log.error("----------------------------------------------------------------")
-            log.error(f"stderr:\n{out}")
-        except Exception as e:
-            proc.kill()
-            log.error(f"Teardown execution encountered an error, {e},\n stdout and stderr are as follows:")
-            log.error(f"stdout:\n{out}")
-            log.error("----------------------------------------------------------------")
-            log.error(f"stderr:\n{out}")
-        else:
-            log.info("Teardown succeeded, stdout and stderr are as follows:")
-            log.info(f"stdout:\n{out}")
-            log.info("----------------------------------------------------------------")
-            log.info(f"stderr:\n{out}")
+    def teardown(self, log):
+        cmd = ["terraform", "destroy", "-auto-approve", "-input=false"]
+        self._run_and_check_tf(cmd, log)
 
 
 def test_maas_terraform_provider():
@@ -133,7 +133,7 @@ def test_maas_terraform_provider():
         tester.setup(log)
         tester.check_results()
     except Exception as e:
-        tester.teardown()
+        tester.teardown(log)
         raise
     else:
         tester.teardown()
