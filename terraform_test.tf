@@ -5,6 +5,9 @@ variable "test_machine_power_address" {}
 variable "test_machine_power_user" {}
 variable "test_machine_power_password" {}
 variable "test_machine_boot_mac" {}
+variable "test_machine_hostname" {
+  default = "natasha"
+}
 variable "path_to_block_device_id" {
     default = ""
 }
@@ -152,7 +155,7 @@ resource "maas_vm_host_machine" "tf_test_vm" {
 
 resource "maas_instance" "tf_test_host_instance" {
     allocate_params {
-        hostname =  "opelt" #"${maas_machine.tf_test_machine.hostname}"
+        hostname =  "${var.test_machine_hostname}"
     }
     deploy_params {
         distro_series = "ubuntu/jammy"
