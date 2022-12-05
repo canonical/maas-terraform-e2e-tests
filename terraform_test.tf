@@ -96,50 +96,6 @@ resource "maas_dns_record" "tf_test_record" {
     fqdn = "tftestrecord.${maas_dns_domain.tf_test_domain.name}"
 }
 
-/*resource "maas_machine" "tf_test_machine" {
-    power_type = "${var.test_machine_power_type}"
-    power_parameters = {
-        power_address = "${var.test_machine_power_address}"
-        power_user = "${var.test_machine_power_user}"
-        power_password = "${var.test_machine_power_password}"
-    }
-    pxe_mac_address = "${var.test_machine_boot_mac}"
-}
-
-resource "maas_network_interface_physical" "tf_test_iface" {
-    machine = maas_machine.tf_test_machine.id
-    mac_address = "${var.test_machine_boot_mac}"
-    name = "eth0"
-    vlan = data.maas_vlan.vlan_0.id
-}
-
-resource "maas_network_interface_link" "tf_test_link" {
-    machine = maas_machine.tf_test_machine.id
-    network_interface = maas_network_interface_physical.tf_test_iface.id
-    subnet = maas_subnet.tf_test_subnet.id
-    mode = "AUTO"
-}
-
-resource "maas_block_device" "tf_test_block_device" {
-    count = var.path_to_block_device_id != "" ? 1 : 0
-    machine = maas_machine.tf_test_machine.id
-    name = "vdb"
-    id_path = "${var.path_to_block_device_id}"
-    size_gigabytes = "${var.block_device_size}"
-    
-    partitions {
-        size_gigabytes = "${var.block_device_partition_1_size}"
-        fs_type = "etx4"
-        mount_point = "/mnt/test_mount_1"
-    }
-
-    partitions {
-        size_gigabytes = "${var.block_device_partition_2_size}"
-        fs_type = "etx4"
-        mount_point = "/mnt/test_mount_2"
-    }
-}*/
-
 resource "maas_vm_host" "tf_test_vm_host" {
     count = var.lxd_address != ""? 1 : 0
     type = "lxd"
