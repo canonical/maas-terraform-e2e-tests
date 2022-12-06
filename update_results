@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+
+import json
+import xmltodict
+
+def convert_junit_to_json_results():
+    with open("junit.xml") as junit_file:
+        junit_xml = xmltodict.parse(junit_file.read())
+    with open("results.json", "r+") as results:
+        results_json = json.load(results)
+        results_json["results"].insert(0, junit_xml)
+        results.seek(0)
+        json.dump(results_json, results)
+
+
+if __name__ == "__main__":
+    convert_junit_to_json_results()
