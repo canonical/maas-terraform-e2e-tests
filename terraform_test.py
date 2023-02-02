@@ -76,9 +76,11 @@ class MAASTerraformEndToEnd:
         assert cfg["name"] in [ space.name for space in spaces ]
 
     def check_maas_vlan(self, cfg: dict[str, Any]):
-        vlans = self._maas.vlans.list()
+        fabrics = self._maas.fabrics.list()
+        vlans = [vlan for fabric in fabrics for vlan in fabric.vlans ]
+
         found = False
-        assert vlans > 0
+        assert len(vlans) > 0
         for vlan in vlans:
             if cfg["name"] == vlan.name:
                 found = True
