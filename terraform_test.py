@@ -84,7 +84,7 @@ class MAASTerraformEndToEnd:
         for vlan in vlans:
             if cfg["name"] == vlan.name:
                 found = True
-                for key, value in cfg.items:
+                for key, value in cfg.items():
                     result = getattr(vlan, key)
                     assert value == result
         assert found
