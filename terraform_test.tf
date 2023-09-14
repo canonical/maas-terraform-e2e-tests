@@ -94,7 +94,7 @@ resource "maas_dns_record" "tf_test_record" {
     type = "A/AAAA"
     data = "10.10.10.1"
     fqdn = "tftestrecord.${maas_dns_domain.tf_test_domain.name}"
-    depends_on = [maas_dns_domain.tf_test_domain]
+    depends_on = [maas_dns_domain.tf_test_domain, maas_subnet.tf_test_subnet]
 }
 
 resource "maas_vm_host" "tf_test_vm_host" {
