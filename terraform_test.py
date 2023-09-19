@@ -109,6 +109,7 @@ class MAASTerraformEndToEnd:
     def check_results(self, log: logging.Logger) -> None:
         resolved_config = self._run_and_check_tf(["terraform", "show"], log)
         tf_config = hcl2.loads(resolved_config)
+        print(tf_config)
         for resource in tf_config["resource"]:
             for resource_type, cfg in resource.items():
                 if hasattr(self, f"check_{resource_type}"):
