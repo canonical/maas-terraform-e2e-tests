@@ -50,6 +50,7 @@ resource "maas_vlan" "tf_test_vlan" {
     name = "tf_test_vlan"
     fabric = maas_fabric.tf_test_fabric.id
     vid = 2
+    depends_on = [maas_fabric.tf_test_fabric]
 }
 
 resource "maas_subnet" "tf_test_subnet" {
@@ -69,6 +70,7 @@ resource "maas_subnet" "tf_test_subnet" {
         start_ip = "10.10.10.24"
         end_ip = "10.10.10.56"
     }
+    depends_on = [maas_vlan.tf_test_vlan]
 }
 
 data "maas_fabric" "fabric_0" {
@@ -90,26 +92,6 @@ resource "maas_dns_domain" "tf_test_domain" {
     authoritative = true
 }
 
-resource "maas_dns_record" "tf_test_record" {
-    type = "A/AAAA"
-    data = "10.10.10.1"
-    fqdn = "tftestrecord.${maas_dns_domain.tf_test_domain.name}"
-    depends_on = [maas_dns_domain.tf_test_domain, maas_subnet.tf_test_subnet]
-}
-
-resource "maas_vm_host" "tf_test_vm_host" {
-    count = var.lxd_address != ""? 1 : 0
-    type = "lxd"
-    power_address = "${var.lxd_address}"
-}
-
-resource "maas_vm_host_machine" "tf_test_vm" {
-    count = var.lxd_address != "" ? 1 : 0
-    cores = 1
-    memory = 2048
-    vm_host = "${maas_vm_host.tf_test_vm_host ? maas_vm_host.tf_test_vm_host[count.index].id : 0}"
-}
-
 resource "maas_instance" "tf_test_host_instance" {
     allocate_params {
         hostname =  "${var.test_machine_hostname}"
@@ -117,15 +99,4 @@ resource "maas_instance" "tf_test_host_instance" {
     deploy_params {
         distro_series = "ubuntu/jammy"
     }
-}
-
-resource "maas_instance" "tf_test_vm_instance" {
-    count = var.lxd_address != "" ? 1 : 0
-    allocate_params {
-        hostname =  "${maas_vm_host_machine.tf_test_vm[count.index].hostname}"
-    }
-    deploy_params {
-        distro_series = "ubuntu/jammy"
-    }
-
 }
