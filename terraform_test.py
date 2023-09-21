@@ -100,7 +100,7 @@ class MAASTerraformEndToEnd:
         assert machine is not None
 
     def check_maas_instance(self, cfg: dict[str, Any]):
-        machine_hostname = cfg["allocate_params"][0]["hostname"]
+        machine_hostname = cfg["hostname"]
         machines = self._maas.machines.list(hostnames=[machine_hostname])
         assert len(machines) == 1
         assert machines[0].hostname == machine_hostname
