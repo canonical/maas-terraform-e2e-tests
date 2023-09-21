@@ -92,6 +92,30 @@ resource "maas_dns_domain" "tf_test_domain" {
     authoritative = true
 }
 
+resource "maas_vm_host" "tf_test_vm_host" {
+    count = var.lxd_address != ""? 1 : 0
+    type = "lxd"
+    power_address = "${var.lxd_address}"
+}
+
+resource "maas_vm_host_machine" "tf_test_vm" {
+    count = var.lxd_address != "" ? 1 : 0
+    cores = 1
+    memory = 2048
+    vm_host = "${maas_vm_host.tf_test_vm_host[0].id}"
+    depends_on = [maas_vm_host.tf_test_vm_host]
+}
+
+resource "maas_instance" "tf_test_vm_instance" {
+    count = var.lxd_address != "" ? 1 : 0
+    allocate_params {
+        hostname =  "${maas_vm_host_machine.tf_test_vm[0].hostname}"
+    }
+    deploy_params {
+        distro_series = "ubuntu/jammy"
+    }
+}
+
 resource "maas_instance" "tf_test_host_instance" {
     allocate_params {
         hostname =  "${var.test_machine_hostname}"
