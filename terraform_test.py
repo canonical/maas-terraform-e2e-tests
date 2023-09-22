@@ -95,6 +95,12 @@ class MAASTerraformEndToEnd:
         domain = self._maas.domains.get(cfg["name"])
         assert domain is not None
 
+    # Re-enable when https://warthogs.atlassian.net/browse/MAASENG-2177 is ready
+    # def check_maas_dns_record(self, cfg: dict[str, Any]):
+    #     record = self._maas.dnsresources.get(cfg["fqdn"])
+    #     assert record is not None
+    #     assert cfg["data"] == record.data
+
     def check_maas_machine(self, cfg: dict[str, Any]):
         machine = self._maas.machines.get(mac_address=cfg["pxe_mac_address"])
         assert machine is not None
