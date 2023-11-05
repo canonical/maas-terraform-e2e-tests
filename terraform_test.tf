@@ -4,26 +4,12 @@ variable "test_machine_power_type" {}
 variable "test_machine_power_address" {}
 variable "test_machine_power_user" {}
 variable "test_machine_power_password" {}
-variable "test_machine_boot_mac" {}
-variable "test_machine_hostname" {
-  default = "natasha"
-}
-variable "path_to_block_device_id" {
-  default = ""
-}
-variable "block_device_size" {
-  default = 0
-}
-variable "block_device_partition_1_size" {
-  default = 0
-}
-variable "block_device_partition_2_size" {
-  default = 0
-}
-variable "lxd_address" {
-  default = ""
-}
+variable "test_machine_power_driver" {}
+variable "test_machine_mac_address" {}
 variable "pxe_subnet_cidr" {}
+variable "distro_series" {
+  default = "ubuntu/focal"
+}
 
 terraform {
   required_providers {
@@ -101,36 +87,33 @@ resource "maas_dns_domain" "tf_test_domain" {
 #     depends_on = [maas_dns_domain.tf_test_domain]
 # }
 
+resource "maas_machine" "tf_test_machine" {
+  power_type = var.test_machine_power_type
+  power_parameters = jsonencode({
+    power_address = var.test_machine_power_address
+    power_user    = var.test_machine_power_user
+    power_pass    = var.test_machine_power_password
+    power_driver  = var.test_machine_power_driver
+  })
+  pxe_mac_address = var.test_machine_mac_address
+}
+
 resource "maas_vm_host" "tf_test_vm_host" {
-  count         = var.lxd_address != "" ? 1 : 0
-  type          = "lxd"
-  power_address = var.lxd_address
+  machine = maas_machine.tf_test_machine.id
+  type    = "lxd"
 }
 
 resource "maas_vm_host_machine" "tf_test_vm" {
-  count      = var.lxd_address != "" ? 1 : 0
-  cores      = 1
-  memory     = 2048
-  vm_host    = maas_vm_host.tf_test_vm_host[0].id
-  depends_on = [maas_vm_host.tf_test_vm_host]
+  vm_host = maas_vm_host.tf_test_vm_host.id
+  cores   = 1
+  memory  = 2048
 }
 
 resource "maas_instance" "tf_test_vm_instance" {
-  count = var.lxd_address != "" ? 1 : 0
   allocate_params {
-    hostname = maas_vm_host_machine.tf_test_vm[0].hostname
+    hostname = maas_vm_host_machine.tf_test_vm.hostname
   }
   deploy_params {
-    distro_series = "ubuntu/jammy"
-  }
-}
-
-resource "maas_instance" "tf_test_host_instance" {
-  count = var.test_machine_hostname != "" ? 1 : 0
-  allocate_params {
-    hostname = var.test_machine_hostname
-  }
-  deploy_params {
-    distro_series = "ubuntu/jammy"
+    distro_series = var.distro_series
   }
 }
