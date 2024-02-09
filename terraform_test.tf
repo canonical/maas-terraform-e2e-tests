@@ -8,7 +8,7 @@ variable "test_machine_power_driver" {}
 variable "test_machine_mac_address" {}
 variable "pxe_subnet_cidr" {}
 variable "distro_series" {
-  default = "ubuntu/focal"
+  default = "ubuntu/jammy"
 }
 
 terraform {
