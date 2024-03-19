@@ -116,4 +116,7 @@ resource "maas_instance" "tf_test_vm_instance" {
   deploy_params {
     distro_series = var.distro_series
   }
+  timeout {
+    create = "40m"
+  }
 }
