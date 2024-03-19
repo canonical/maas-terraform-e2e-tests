@@ -107,6 +107,9 @@ resource "maas_vm_host_machine" "tf_test_vm" {
   vm_host = maas_vm_host.tf_test_vm_host.id
   cores   = 1
   memory  = 2048
+  timeout {
+    create = "40m"
+  }
 }
 
 resource "maas_instance" "tf_test_vm_instance" {
@@ -115,8 +118,5 @@ resource "maas_instance" "tf_test_vm_instance" {
   }
   deploy_params {
     distro_series = var.distro_series
-  }
-  timeout {
-    create = "40m"
   }
 }
