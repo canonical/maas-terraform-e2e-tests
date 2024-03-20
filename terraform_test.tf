@@ -102,7 +102,7 @@ resource "maas_vm_host" "tf_test_vm_host" {
   machine = maas_machine.tf_test_machine.id
   type    = "lxd"
 
-  timeout {
+  timeouts {
     create = "40m"
   }
 }
