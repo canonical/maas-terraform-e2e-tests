@@ -101,15 +101,16 @@ resource "maas_machine" "tf_test_machine" {
 resource "maas_vm_host" "tf_test_vm_host" {
   machine = maas_machine.tf_test_machine.id
   type    = "lxd"
+
+  timeout {
+    create = "40m"
+  }
 }
 
 resource "maas_vm_host_machine" "tf_test_vm" {
   vm_host = maas_vm_host.tf_test_vm_host.id
   cores   = 1
   memory  = 2048
-  timeout {
-    create = "40m"
-  }
 }
 
 resource "maas_instance" "tf_test_vm_instance" {
