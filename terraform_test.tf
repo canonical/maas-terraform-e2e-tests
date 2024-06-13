@@ -5,6 +5,7 @@ variable "test_machine_power_address" {}
 variable "test_machine_power_user" {}
 variable "test_machine_power_password" {}
 variable "test_machine_power_driver" {}
+variable "test_machine_power_boot_type" {}
 variable "test_machine_mac_address" {}
 variable "pxe_subnet_cidr" {}
 variable "distro_series" {
@@ -90,10 +91,11 @@ resource "maas_dns_domain" "tf_test_domain" {
 resource "maas_machine" "tf_test_machine" {
   power_type = var.test_machine_power_type
   power_parameters = jsonencode({
-    power_address = var.test_machine_power_address
-    power_user    = var.test_machine_power_user
-    power_pass    = var.test_machine_power_password
-    power_driver  = var.test_machine_power_driver
+    power_address   = var.test_machine_power_address
+    power_user      = var.test_machine_power_user
+    power_pass      = var.test_machine_power_password
+    power_driver    = var.test_machine_power_driver
+    power_boot_type = var.test_machine_power_boot_type
   })
   pxe_mac_address = var.test_machine_mac_address
 }
