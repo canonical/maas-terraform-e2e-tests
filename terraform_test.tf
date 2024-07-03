@@ -15,7 +15,7 @@ variable "distro_series" {
 terraform {
   required_providers {
     maas = {
-      source = "terraform.maas.io/maas/maas"
+      source = "terraform.maas.io/canonical/maas"
     }
   }
 }
