@@ -98,6 +98,10 @@ resource "maas_machine" "tf_test_machine" {
     power_boot_type = var.test_machine_power_boot_type
   })
   pxe_mac_address = var.test_machine_mac_address
+
+  timeouts {
+    create = "40m"
+  }
 }
 
 resource "maas_vm_host" "tf_test_vm_host" {
@@ -113,6 +117,10 @@ resource "maas_vm_host_machine" "tf_test_vm" {
   vm_host = maas_vm_host.tf_test_vm_host.id
   cores   = 1
   memory  = 2048
+
+  timeouts {
+    create = "40m"
+  }
 }
 
 resource "maas_instance" "tf_test_vm_instance" {
@@ -129,4 +137,8 @@ resource "maas_vm_host_machine" "tf_test_vm_acceptance" {
   vm_host  = maas_vm_host.tf_test_vm_host.id
   cores    = 1
   memory   = 2048
+
+  timeouts {
+    create = "40m"
+  }
 }
