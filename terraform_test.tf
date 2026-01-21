@@ -107,6 +107,15 @@ resource "maas_vm_host" "tf_test_vm_host" {
   timeouts {
     create = "40m"
   }
+
+  # Wait for MAAS to finish processing the machine before proceeding.
+  # While the machine is reported as deployed, MAAS may still be setting it
+  # up for VM hosting. The VM host configuration is happening after the machine
+  # is deployed, so there is chance that the VM host setup is not complete yet.
+  # Adding  a sleep here as a workaround.
+  provisioner "local-exec" {
+    command = "sleep 60"
+  }
 }
 
 resource "maas_vm_host_machine" "tf_test_vm" {
