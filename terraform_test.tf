@@ -105,7 +105,7 @@ resource "maas_vm_host" "tf_test_vm_host" {
   type    = "lxd"
 
   timeouts {
-    create = "40m"
+    create = "60m"
   }
 
   # Wait for MAAS to finish processing the machine before proceeding.
@@ -122,6 +122,10 @@ resource "maas_vm_host_machine" "tf_test_vm" {
   vm_host = maas_vm_host.tf_test_vm_host.id
   cores   = 1
   memory  = 2048
+
+  timeouts {
+    create = "60m"
+  }
 }
 
 resource "maas_instance" "tf_test_vm_instance" {
@@ -131,6 +135,10 @@ resource "maas_instance" "tf_test_vm_instance" {
   deploy_params {
     distro_series = var.distro_series
   }
+
+  timeouts {
+    create = "60m"
+  }
 }
 
 resource "maas_vm_host_machine" "tf_test_vm_acceptance" {
@@ -138,4 +146,8 @@ resource "maas_vm_host_machine" "tf_test_vm_acceptance" {
   vm_host  = maas_vm_host.tf_test_vm_host.id
   cores    = 1
   memory   = 2048
+
+  timeouts {
+    create = "60m"
+  }
 }
