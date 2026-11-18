@@ -35,10 +35,9 @@ resource "maas_fabric" "tf_test_fabric" {
 }
 
 resource "maas_vlan" "tf_test_vlan" {
-  name       = "tf_test_vlan"
-  fabric     = maas_fabric.tf_test_fabric.id
-  vid        = 2
-  depends_on = [maas_fabric.tf_test_fabric]
+  name   = "tf_test_vlan"
+  fabric = maas_fabric.tf_test_fabric.id
+  vid    = 2
 }
 
 resource "maas_subnet" "tf_test_subnet" {
@@ -48,17 +47,20 @@ resource "maas_subnet" "tf_test_subnet" {
   cidr        = "10.10.10.0/24"
   gateway_ip  = "10.10.10.1"
   dns_servers = ["1.1.1.1"]
-  ip_ranges {
-    type     = "reserved"
-    start_ip = "10.10.10.1"
-    end_ip   = "10.10.10.12"
-  }
-  ip_ranges {
-    type     = "dynamic"
-    start_ip = "10.10.10.24"
-    end_ip   = "10.10.10.56"
-  }
-  depends_on = [maas_vlan.tf_test_vlan]
+}
+
+resource "maas_subnet_ip_range" "tf_test_ip_range_reserved" {
+  subnet   = maas_subnet.tf_test_subnet.id
+  type     = "reserved"
+  start_ip = "10.10.10.1"
+  end_ip   = "10.10.10.12"
+}
+
+resource "maas_subnet_ip_range" "tf_test_ip_range_dynamic" {
+  subnet   = maas_subnet.tf_test_subnet.id
+  type     = "dynamic"
+  start_ip = "10.10.10.24"
+  end_ip   = "10.10.10.56"
 }
 
 data "maas_fabric" "fabric_0" {
@@ -80,13 +82,11 @@ resource "maas_dns_domain" "tf_test_domain" {
   authoritative = true
 }
 
-# Re-enable when https://warthogs.atlassian.net/browse/MAASENG-2177 is ready
-# resource "maas_dns_record" "tf_test_record" {
-#     type = "A/AAAA"
-#     data = "10.10.10.1"
-#     fqdn = "tftestrecord.${maas_dns_domain.tf_test_domain.name}"
-#     depends_on = [maas_dns_domain.tf_test_domain]
-# }
+resource "maas_dns_record" "tf_test_record" {
+  type = "A/AAAA"
+  data = "10.10.10.1"
+  fqdn = "tftestrecord.${maas_dns_domain.tf_test_domain.name}"
+}
 
 resource "maas_machine" "tf_test_machine" {
   power_type = var.test_machine_power_type
